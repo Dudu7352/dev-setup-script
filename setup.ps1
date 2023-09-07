@@ -8,10 +8,13 @@ if ( $Clean )
 else
 {
     Write-Output "Setting up..."
-    if ( $PSBoundParameters.ContainsKey("Code") )
+    if ( -Not $NoCode )
     {
         Write-Output "Installing VSCode on a pendrive..."
         . $PSScriptRoot\setup_code.ps1
+
+        Write-Output "Adding VSCode to the path"
+        . $PSScriptRoot\setup_path.ps1
     }
 
     Write-Output "Setting up winget..."
