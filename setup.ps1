@@ -1,38 +1,55 @@
-Write-Output "Installing essentials ..."
+param ([switch] $NoCode, [switch] $Clean)
 
-if (Get-Command "winget" -errorAction SilentlyContinue)
+if ( $Clean )
 {
-    Write-Output "winget installed"
+    Write-Output "Cleaning up..."
+    . $PSScriptRoot\clean.ps1
 }
-else 
+else
 {
-    Write-Output "installing winget"
-    # get latest download url
-    $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
-    $URL = (Invoke-WebRequest -Uri $URL).Content | ConvertFrom-Json |
-            Select-Object -ExpandProperty "assets" |
-            Where-Object "browser_download_url" -Match '.msixbundle' |
-            Select-Object -ExpandProperty "browser_download_url"
+    Write-Output "Setting up..."
+    if ( $PSBoundParameters.ContainsKey("Code") )
+    {
+        Write-Output "Installing VSCode on a pendrive..."
+        . $PSScriptRoot\setup_code.ps1
+    }
 
-    # download
-    Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing
+    Write-Output "Setting up winget..."
+    if (Get-Command "winget" -errorAction SilentlyContinue)
+    {
+        Write-Output "Winget already installed"
+    }
+    else 
+    {
+        Write-Output "Installing winget..."
+        # get latest download url
+        $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+        $URL = (Invoke-WebRequest -Uri $URL).Content | ConvertFrom-Json |
+                Select-Object -ExpandProperty "assets" |
+                Where-Object "browser_download_url" -Match '.msixbundle' |
+                Select-Object -ExpandProperty "browser_download_url"
 
-    # install
-    Add-AppxPackage -Path "Setup.msix"
+        # download
+        Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing
 
-    # delete file
-    Remove-Item "Setup.msix"
-}
+        # install
+        Add-AppxPackage -Path "Setup.msix"
 
-$soft_list = @(
-    "Python.Python.3.11", 
-    "Mozilla.Firefox", 
-    "Git.Git", 
-    "Microsoft.WindowsTerminal"
-)
+        # delete file
+        Remove-Item "Setup.msix"
+        Write-Output "Winget installed"
+    }
 
-foreach( $soft in $soft_list )
-{
-    winget install --accept-source-agreements --accept-package-agreements --silent $soft
-    Write-Output "$soft installed"
+    $soft_list = @(
+        "Python.Python.3.11", 
+        "Mozilla.Firefox", 
+        "Git.Git", 
+        "Microsoft.WindowsTerminal"
+    )
+
+    foreach( $soft in $soft_list )
+    {
+        winget install --accept-source-agreements --accept-package-agreements --silent $soft
+        Write-Output "$soft installed"
+    }
 }
