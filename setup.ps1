@@ -1,14 +1,27 @@
-param ([switch] $NoCode, [switch] $Clean)
+param ([switch] $Code, [switch] $Clean)
+
+$isAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
+if( -Not $isAdmin )
+{
+    Write-Error "Script needs to be ran with administrator priviledges!"
+    exit
+}
 
 if ( $Clean )
 {
     Write-Output "Cleaning up..."
-    . $PSScriptRoot\clean.ps1
+    . $PSScriptRoot\clean_path.ps1
+
+    if ( $Code )
+    {
+        Write-Output "Removing vscode installation"
+        Remove-Item -LiteralPath $PSScriptRoot\VSCode -Force -Recurse
+    }
 }
 else
 {
     Write-Output "Setting up..."
-    if ( -Not $NoCode )
+    if ( $Code )
     {
         Write-Output "Installing VSCode on a pendrive..."
         . $PSScriptRoot\setup_code.ps1
