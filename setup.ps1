@@ -7,6 +7,13 @@ if( -Not $isAdmin )
     exit
 }
 
+$soft_list = @(
+    "Python.Python.3.11", 
+    "Mozilla.Firefox", 
+    "Git.Git", 
+    "Microsoft.WindowsTerminal"
+)
+
 if ( $Clean )
 {
     Write-Output "Cleaning up..."
@@ -16,6 +23,12 @@ if ( $Clean )
     {
         Write-Output "Removing vscode installation"
         Remove-Item -LiteralPath $PSScriptRoot\VSCode -Force -Recurse
+    }
+
+    foreach( $soft in $soft_list )
+    {
+        winget uninstall --silent $soft
+        Write-Output "$soft uninstalled"
     }
 }
 else
@@ -55,13 +68,6 @@ else
         Remove-Item "Setup.msix"
         Write-Output "Winget installed"
     }
-
-    $soft_list = @(
-        "Python.Python.3.11", 
-        "Mozilla.Firefox", 
-        "Git.Git", 
-        "Microsoft.WindowsTerminal"
-    )
 
     foreach( $soft in $soft_list )
     {
