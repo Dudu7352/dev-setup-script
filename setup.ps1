@@ -56,3 +56,5 @@ else
         Write-Output "$soft installed"
     }
 }
+
+Write-Output "Success!"
